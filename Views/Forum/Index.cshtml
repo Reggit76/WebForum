@@ -1,0 +1,24 @@
+﻿@model IEnumerable<WebForum.Models.Topic>
+
+@{
+    ViewData["Title"] = "Forum";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="mb-3">
+    <a class="btn btn-primary" href="@Url.Action("Create", "Forum")">Create New Topic</a>
+</div>
+
+<ul class="list-group">
+    @foreach (var topic in Model)
+    {
+        <li class="list-group-item">
+            <h5>
+                <a href="@Url.Action("Details", "Forum", new { id = topic.Id })">@topic.Title</a>
+            </h5>
+            <p>@topic.Content</p>
+            <small>Created by @topic.User.UserName on @topic.Created</small>
+        </li>
+    }
+</ul>

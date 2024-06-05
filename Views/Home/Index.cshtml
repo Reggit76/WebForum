@@ -1,0 +1,19 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="jumbotron">
+    <h1 class="display-4">Welcome to WebForum!</h1>
+    <p class="lead">A place to discuss and share knowledge.</p>
+    <hr class="my-4">
+    <p>Join the conversation by creating an account or logging in.</p>
+    @if (!User.Identity.IsAuthenticated)
+    {
+        <a class="btn btn-primary btn-lg" href="@Url.Action("Register", "Account")" role="button">Register</a>
+        <a class="btn btn-secondary btn-lg" href="@Url.Action("Login", "Account")" role="button">Login</a>
+    }
+    else
+    {
+        <a class="btn btn-primary btn-lg" href="@Url.Action("Index", "Forum")" role="button">Go to Forum</a>
+    }
+</div>
