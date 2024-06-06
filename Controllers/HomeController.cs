@@ -1,22 +1,29 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
-using WebForum.Models;
+using System.Threading.Tasks;
+using WebForum.Services;
 using WebForum.Models.ViewModels;
+using System.Diagnostics;
 
 namespace WebForum.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly IForumService _forumService;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(IForumService forumService)
         {
-            _logger = logger;
+            _forumService = forumService;
         }
 
-        public IActionResult Index()
+        [HttpGet]
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var topics = await _forumService.GetRecentTopicsAsync();
+            var model = new ForumIndexViewModel
+            {
+                RecentTopics = topics
+            };
+            return View(model);
         }
 
         public IActionResult Privacy()

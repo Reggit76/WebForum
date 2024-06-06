@@ -1,11 +1,12 @@
 ﻿$(document).ready(function () {
-    $(".toggle-password").click(function () {
-        $(this).toggleClass("fa-eye fa-eye-slash");
-        var input = $($(this).attr("toggle"));
-        if (input.attr("type") == "password") {
-            input.attr("type", "text");
+    $("#showPassword").click(function () {
+        var passwordInput = $("#Password");
+        if (passwordInput.attr("type") === "password") {
+            passwordInput.attr("type", "text");
+            $(this).text("Hide Password");
         } else {
-            input.attr("type", "password");
+            passwordInput.attr("type", "password");
+            $(this).text("Show Password");
         }
     });
 });

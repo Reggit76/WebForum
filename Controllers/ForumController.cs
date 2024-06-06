@@ -10,20 +10,29 @@ namespace WebForum.Controllers
     public class ForumController : Controller
     {
         private readonly IForumService _forumService;
-        private readonly IUserService _userService;
+        private readonly ICategoryService _categoryService;
 
-        public ForumController(IForumService forumService, IUserService userService)
+        public ForumController(IForumService forumService, ICategoryService categoryService)
         {
             _forumService = forumService;
-            _userService = userService;
+            _categoryService = categoryService;
         }
 
+
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
             var topics = await _forumService.GetAllTopicsAsync();
-            return View(topics);
+            var categories = await _forumService.GetAllCategoriesAsync();
+            var model = new ForumIndexViewModel
+            {
+                RecentTopics = topics,
+                Categories = categories
+            };
+            return View(model);
         }
 
+        [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
             var topic = await _forumService.GetTopicByIdAsync(id);
@@ -31,25 +40,69 @@ namespace WebForum.Controllers
             {
                 return NotFound();
             }
-
+            var posts = await _forumService.GetPostsByTopicIdAsync(id);
             var model = new TopicDetailsViewModel
             {
                 Topic = topic,
-                Posts = await _forumService.GetPostsByTopicIdAsync(id)
+                Posts = posts.ToList(),
+                NewPost = new Post { TopicId = id }
             };
-
             return View(model);
         }
 
-        [Authorize]
-        public IActionResult Create()
+        [Authorize(Roles = "Moderator,Administrator")]
+        [HttpGet]
+        public IActionResult CreateCategory()
         {
             return View();
         }
 
+        [Authorize(Roles = "Moderator,Administrator")]
         [HttpPost]
+        public async Task<IActionResult> CreateCategory(Category model)
+        {
+            if (ModelState.IsValid)
+            {
+                await _categoryService.AddCategoryAsync(model);
+                return RedirectToAction("Index");
+            }
+            return View(model);
+        }
+
+        [Authorize(Roles = "Moderator,Administrator")]
+        [HttpGet]
+        public async Task<IActionResult> EditCategory(int id)
+        {
+            var category = await _categoryService.GetCategoryByIdAsync(id);
+            if (category == null)
+            {
+                return NotFound();
+            }
+            return View(category);
+        }
+
+        [Authorize(Roles = "Moderator,Administrator")]
+        [HttpPost]
+        public async Task<IActionResult> EditCategory(Category model)
+        {
+            if (ModelState.IsValid)
+            {
+                await _categoryService.UpdateCategoryAsync(model);
+                return RedirectToAction("Index");
+            }
+            return View(model);
+        }
+
         [Authorize]
-        public async Task<IActionResult> Create(CreateTopicViewModel model)
+        [HttpGet]
+        public IActionResult CreateTopic()
+        {
+            return View();
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> CreateTopic(CreateTopicViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -57,34 +110,57 @@ namespace WebForum.Controllers
                 {
                     Title = model.Title,
                     Content = model.Content,
-                    Created = DateTime.UtcNow,
-                    UserId = int.Parse(User.Identity.Name) // Assuming User.Identity.Name contains user id
+                    CategoryId = model.CategoryId,
+                    UserId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "UserId").Value),
+                    CreatedAt = DateTime.UtcNow
                 };
-
                 await _forumService.AddTopicAsync(topic);
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index");
             }
             return View(model);
         }
 
+        [Authorize(Roles = "Moderator,Administrator")]
         [HttpPost]
+        public async Task<IActionResult> DeleteTopic(int id)
+        {
+            await _forumService.DeleteTopicAsync(id);
+            return RedirectToAction("Index");
+        }
+
         [Authorize]
-        public async Task<IActionResult> AddPost(int topicId, string content)
+        [HttpGet]
+        public IActionResult CreatePost(int topicId)
+        {
+            var model = new Post { TopicId = topicId };
+            return View(model);
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> CreatePost(Post model)
         {
             if (ModelState.IsValid)
             {
-                var post = new Post
-                {
-                    Content = content,
-                    Created = DateTime.UtcNow,
-                    TopicId = topicId,
-                    UserId = int.Parse(User.Identity.Name) // Assuming User.Identity.Name contains user id
-                };
-
-                await _forumService.AddPostAsync(post);
-                return RedirectToAction(nameof(Details), new { id = topicId });
+                model.UserId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "UserId").Value);
+                model.CreatedAt = DateTime.UtcNow;
+                await _forumService.AddPostAsync(model);
+                return RedirectToAction("Details", new { id = model.TopicId });
             }
-            return RedirectToAction(nameof(Details), new { id = topicId });
+            return View(model);
+        }
+
+        [Authorize(Roles = "Moderator,Administrator")]
+        [HttpPost]
+        public async Task<IActionResult> DeletePost(int id)
+        {
+            var post = await _forumService.GetPostByIdAsync(id);
+            if (post == null)
+            {
+                return NotFound();
+            }
+            await _forumService.DeletePostAsync(id);
+            return RedirectToAction("Details", new { id = post.TopicId });
         }
     }
 }

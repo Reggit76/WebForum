@@ -1,24 +1,35 @@
-﻿@model IEnumerable<WebForum.Models.Topic>
+﻿@model WebForum.Models.ViewModels.ForumIndexViewModel
 
 @{
     ViewData["Title"] = "Forum";
 }
 
-<h2>@ViewData["Title"]</h2>
+<h1>Forum</h1>
 
-<div class="mb-3">
-    <a class="btn btn-primary" href="@Url.Action("Create", "Forum")">Create New Topic</a>
+<div class="recent-topics">
+    <h2>Recent Topics</h2>
+    <ul>
+        @foreach (var topic in Model.RecentTopics)
+        {
+            <li>@topic.Title - @topic.CreatedAt.ToString("g")</li>
+        }
+    </ul>
 </div>
 
-<ul class="list-group">
-    @foreach (var topic in Model)
-    {
-        <li class="list-group-item">
-            <h5>
-                <a href="@Url.Action("Details", "Forum", new { id = topic.Id })">@topic.Title</a>
-            </h5>
-            <p>@topic.Content</p>
-            <small>Created by @topic.User.UserName on @topic.Created</small>
-        </li>
-    }
-</ul>
+<div class="categories">
+    <h2>Categories</h2>
+    <ul>
+        @foreach (var category in Model.Categories)
+        {
+            <li>
+                @category.Name
+                <ul>
+                    @foreach (var topic in category.Topics)
+                    {
+                        <li>@topic.Title</li>
+                    }
+                </ul>
+            </li>
+        }
+    </ul>
+</div>

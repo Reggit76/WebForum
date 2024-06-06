@@ -1,0 +1,62 @@
+﻿@model IEnumerable<WebForum.Models.User>
+
+@{
+    ViewData["Title"] = "Users";
+}
+
+<h1>Users</h1>
+
+<form asp-action="Index" method="get">
+    <input type="text" name="search" placeholder="Search users..." />
+    <button type="submit">Search</button>
+</form>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.UserName</td>
+                <td>@user.Email</td>
+                <td>@user.Role</td>
+                <td>
+                    @if (User.IsInRole("Administrator"))
+                    {
+                        <form asp-action="ChangeRole" method="post" class="d-inline">
+                            <input type="hidden" name="id" value="@user.Id" />
+                            <select name="role" class="form-control d-inline w-auto">
+                                @{
+                                    var isRegularUserSelected = user.Role == Role.RegularUser ? "selected" : "";
+                                    var isModeratorSelected = user.Role == Role.Moderator ? "selected" : "";
+                                }
+                                <option value="RegularUser" selected=@isRegularUserSelected>Regular User</option>
+                                <option value="Moderator" selected=@isModeratorSelected>Moderator</option>
+                            </select>
+                            <button type="submit" class="btn btn-primary">Change Role</button>
+                        </form>
+                    }
+                    <form asp-action="BanUser" method="post" class="d-inline">
+                        <input type="hidden" name="id" value="@user.Id" />
+                        <button type="submit" class="btn btn-danger">Ban</button>
+                    </form>
+                    @if (user.IsBanned)
+                    {
+                        <form asp-action="UnbanUser" method="post" class="d-inline">
+                            <input type="hidden" name="id" value="@user.Id" />
+                            <button type="submit" class="btn btn-success">Unban</button>
+                        </form>
+                    }
+                    <a class="btn btn-info" href="@Url.Action("Edit", new { id = user.Id })">Edit</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

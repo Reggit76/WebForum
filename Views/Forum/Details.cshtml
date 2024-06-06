@@ -4,37 +4,36 @@
     ViewData["Title"] = Model.Topic.Title;
 }
 
-<h2>@ViewData["Title"]</h2>
+<h2>@Model.Topic.Title</h2>
 
-<div class="mb-3">
+<div>
     <p>@Model.Topic.Content</p>
-    <small>Created by @Model.Topic.User.UserName on @Model.Topic.Created</small>
+    <p>Posted by: @Model.Topic.User.UserName on @Model.Topic.CreatedAt.ToString("MMMM dd, yyyy")</p>
 </div>
 
 <hr />
 
 <h3>Posts</h3>
+@foreach (var post in Model.Posts)
+{
+    <div>
+        <p>@post.Content</p>
+        <p>Posted by: @post.User.UserName on @post.CreatedAt.ToString("MMMM dd, yyyy")</p>
+        <p>Rating: @post.Rating</p> <!-- Fix Rating property -->
+    </div>
+}
 
-<ul class="list-group">
-    @foreach (var post in Model.Posts)
-    {
-        <li class="list-group-item">
-            <p>@post.Content</p>
-            <small>Posted by @post.User.UserName on @post.Created</small>
-        </li>
-    }
-</ul>
+<hr />
 
 @if (User.Identity.IsAuthenticated)
 {
-    <form asp-action="AddPost">
+    <h4>Add a post</h4>
+    <form asp-action="CreatePost" method="post">
+        <input type="hidden" asp-for="Topic.Id" />
         <div class="form-group">
-            <label for="Content">Add a post</label>
-            <textarea id="Content" name="content" class="form-control"></textarea>
+            <textarea asp-for="NewPost.Content" class="form-control"></textarea>
+            <span asp-validation-for="NewPost.Content" class="text-danger"></span>
         </div>
-        <input type="hidden" name="topicId" value="@Model.Topic.Id" />
-        <div class="form-group">
-            <button type="submit" class="btn btn-primary">Post</button>
-        </div>
+        <button type="submit" class="btn btn-primary">Post</button>
     </form>
 }

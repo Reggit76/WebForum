@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace WebForum.Views.Forum
+namespace WebForum.Views.Users
 {
-    public class CreateModel : PageModel
+    public class EditProfileModel : PageModel
     {
         public void OnGet()
         {

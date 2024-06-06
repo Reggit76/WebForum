@@ -1,26 +1,24 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using WebForum.Models;
 
 namespace WebForum.Models.ViewModels
 {
-    public class EditUserProfileViewModel
+    public class EditProfileViewModel
     {
-        public int UserId { get; set; }
+        public int Id { get; set; }
 
         [Required]
-        [StringLength(256)]
+        [Display(Name = "User Name")]
         public string UserName { get; set; }
 
         [Required]
-        [StringLength(256)]
+        [EmailAddress]
         public string Email { get; set; }
 
         public Gender Gender { get; set; }
 
-        [StringLength(256)]
+        [Url]
         public string AvatarUrl { get; set; }
 
-        [StringLength(1024)]
         public string Description { get; set; }
     }
 }

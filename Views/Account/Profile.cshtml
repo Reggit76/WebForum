@@ -6,18 +6,12 @@
 
 <h2>@Model.UserName's Profile</h2>
 
-<div class="card">
-    <div class="card-body">
-        <h5 class="card-title">@Model.UserName</h5>
-        <p class="card-text">Email: @Model.Email</p>
-        <p class="card-text">Gender: @Model.Gender</p>
-        <p class="card-text">Description: @Model.Description</p>
-        <p class="card-text">Role: @Model.Role</p>
-        <img src="@Model.AvatarUrl" class="img-thumbnail" alt="Avatar" style="width: 150px; height: 150px;" />
-    </div>
+<div>
+    <img src="@Model.AvatarUrl" alt="User Avatar" style="width: 150px; height: 150px;" />
 </div>
-
-@if (User.Identity.Name == Model.UserName || User.IsInRole("Moderator") || User.IsInRole("Administrator"))
-{
-    <a href="@Url.Action("Edit", "Account", new { id = Model.Id })" class="btn btn-primary">Edit Profile</a>
-}
+<div>
+    <h3>@Model.UserName</h3>
+    <p>Email: @Model.Email</p>
+    <p>Gender: @Model.Gender</p>
+    <p>Description: @Model.Description</p>
+</div>

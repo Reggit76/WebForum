@@ -6,6 +6,7 @@ namespace WebForum.Models.ViewModels
     public class TopicDetailsViewModel
     {
         public Topic Topic { get; set; }
-        public IEnumerable<Post> Posts { get; set; }
+        public List<Post> Posts { get; set; }
+        public Post NewPost { get; set; }
     }
 }

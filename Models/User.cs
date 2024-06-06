@@ -1,21 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Identity;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WebForum.Models
 {
-    public class User
+    public enum Gender
     {
-        public int Id { get; set; }
-        public string UserName { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string AvatarUrl { get; set; } = "/images/default-avatar.png";
-        public Gender Gender { get; set; }
-        public Role Role { get; set; } = Role.RegularUser;
-        public string Description { get; set; } = String.Empty;
-        public ICollection<Topic> Topics { get; set; } = new List<Topic>();
-        public ICollection<Post> Posts { get; set; } = new List<Post>();
-
-        public User() { }
+        Male,
+        Female,
+        Other
     }
 
     public enum Role
@@ -25,10 +19,21 @@ namespace WebForum.Models
         Administrator
     }
 
-    public enum Gender
+    public class User : IdentityUser<int>
     {
-        Male,
-        Female,
-        Other
+
+        [Required]
+        public Gender Gender { get; set; }
+
+        public string AvatarUrl { get; set; } = string.Empty;
+
+        [Required]
+        public Role Role { get; set; }
+
+        public string Description { get; set; } = string.Empty;
+        public bool IsBanned { get; set; }
+
+        public ICollection<Topic> Topics { get; set; } = new List<Topic>();
+        public ICollection<Post> Posts { get; set; } = new List<Post>();
     }
 }

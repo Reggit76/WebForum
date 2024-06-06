@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;
 using WebForum.Models;
 using WebForum.Models.ViewModels;
@@ -9,62 +11,86 @@ namespace WebForum.Controllers
     public class AccountController : Controller
     {
         private readonly IUserService _userService;
+        private readonly UserManager<User> _userManager;
 
-        public AccountController(IUserService userService)
+        public AccountController(IUserService userService, UserManager<User> userManager)
         {
             _userService = userService;
+            _userManager = userManager;
         }
 
-        [HttpGet]
-        public IActionResult Register()
+        [AllowAnonymous]
+        public IActionResult Banned()
         {
             return View();
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Register(RegisterViewModel model)
-        {
-            if (ModelState.IsValid)
-            {
-                var user = new User
-                {
-                    UserName = model.UserName,
-                    Email = model.Email,
-                    Gender = model.Gender
-                };
-
-                var result = await _userService.CreateUserAsync(user, model.Password);
-                if (result)
-                {
-                    await _userService.SignInUserAsync(model.Email, model.Password);
-                    return RedirectToAction("Index", "Home");
-                }
-            }
-            return View(model);
-        }
 
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult Login()
         {
             return View();
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (ModelState.IsValid)
             {
-                var result = await _userService.SignInUserAsync(model.Email, model.Password);
-                if (result)
+                var result = await _userService.AuthenticateUserAsync(model.Email, model.Password);
+                if (result.Succeeded)
                 {
                     return RedirectToAction("Index", "Home");
                 }
+
                 ModelState.AddModelError(string.Empty, "Invalid login attempt.");
             }
+
+            return View(model);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult Register()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> Register(RegisterViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = new User
+                {
+                    UserName = model.Email,
+                    Email = model.Email,
+                    Gender = model.Gender,
+                    AvatarUrl = string.IsNullOrEmpty(model.AvatarUrl) ? "/images/default-avatar.png" : model.AvatarUrl,
+                    Description = model.Description
+                };
+
+                var result = await _userService.CreateUserAsync(user, model.Password);
+                if (result.Succeeded)
+                {
+                    await _userService.AuthenticateUserAsync(model.Email, model.Password);
+                    return RedirectToAction("Index", "Home");
+                }
+
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+            }
+
             return View(model);
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> Logout()
         {
             await _userService.SignOutUserAsync();
@@ -72,32 +98,47 @@ namespace WebForum.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Profile(int id)
+        [Authorize]
+        public async Task<IActionResult> Profile()
         {
-            var user = await _userService.GetUserByIdAsync(id);
+            var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
                 return NotFound();
             }
-            var model = new UserProfileViewModel
+            var userProfile = await _userService.GetUserProfileByIdAsync(user.Id);
+            return View(userProfile);
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> EditProfile()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
             {
-                UserId = user.Id,
-                UserName = user.UserName,
-                Email = user.Email,
-                Gender = user.Gender,
-                AvatarUrl = user.AvatarUrl,
-                Description = user.Description,
-                Topics = user.Topics.ToList()
+                return NotFound();
+            }
+            var userProfile = await _userService.GetUserProfileByIdAsync(user.Id);
+            var model = new EditProfileViewModel
+            {
+                Id = userProfile.Id,
+                UserName = userProfile.UserName,
+                Email = userProfile.Email,
+                Gender = userProfile.Gender,
+                AvatarUrl = userProfile.AvatarUrl,
+                Description = userProfile.Description
             };
             return View(model);
         }
 
         [HttpPost]
-        public async Task<IActionResult> EditProfile(EditUserProfileViewModel model)
+        [Authorize]
+        public async Task<IActionResult> EditProfile(EditProfileViewModel model)
         {
             if (ModelState.IsValid)
             {
-                var user = await _userService.GetUserByIdAsync(model.UserId);
+                var user = await _userManager.GetUserAsync(User);
                 if (user == null)
                 {
                     return NotFound();
@@ -110,7 +151,7 @@ namespace WebForum.Controllers
                 user.Description = model.Description;
 
                 await _userService.UpdateUserAsync(user);
-                return RedirectToAction("Profile", new { id = model.UserId });
+                return RedirectToAction("Profile");
             }
             return View(model);
         }
