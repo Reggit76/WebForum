@@ -16,7 +16,7 @@ namespace WebForum.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<Category>> GetAllCategoriesAsync()
+        public async Task<List<Category>> GetAllCategoriesAsync()
         {
             return await _context.Categories
                 .Include(c => c.Topics)

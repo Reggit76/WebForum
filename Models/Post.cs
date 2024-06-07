@@ -13,6 +13,8 @@ namespace WebForum.Models
 
         public DateTime CreatedAt { get; set; }
 
+        public int Rating { get; set; }
+
         [ForeignKey("User")]
         public int UserId { get; set; }
         public User? User { get; set; }
@@ -20,7 +22,5 @@ namespace WebForum.Models
         [ForeignKey("Topic")]
         public int TopicId { get; set; }
         public Topic? Topic { get; set; }
-
-        public int Rating { get; set; }
     }
 }

@@ -6,12 +6,28 @@
 
 <h2>@Model.UserName's Profile</h2>
 
-<div>
-    <img src="@Model.AvatarUrl" alt="User Avatar" style="width: 150px; height: 150px;" />
+<div class="form-group">
+    <label>Email:</label>
+    <p>@Model.Email</p>
 </div>
-<div>
-    <h3>@Model.UserName</h3>
-    <p>Email: @Model.Email</p>
-    <p>Gender: @Model.Gender</p>
-    <p>Description: @Model.Description</p>
+<div class="form-group">
+    <label>Gender:</label>
+    <p>@Model.Gender</p>
 </div>
+<div class="form-group">
+    <label>Avatar:</label>
+    <img src="@Model.AvatarUrl" alt="Avatar" style="width:100px;height:100px;" />
+</div>
+<div class="form-group">
+    <label>Description:</label>
+    <p>@Model.Description</p>
+</div>
+<div class="form-group">
+    <label>Role:</label>
+    <p>@Model.Role</p>
+</div>
+
+@if (User.Identity.Name == Model.UserName)
+{
+    <a class="btn btn-primary" href="@Url.Action("EditProfile", "Account")">Edit Profile</a>
+}

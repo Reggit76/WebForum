@@ -4,17 +4,31 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about building web apps with ASP.NET Core.</p>
-</div>
+<h1>Приветствуем на лучшем форуме имени Dj Doneeel</h1>
 
-<div class="recent-topics">
-    <h2>Recent Topics</h2>
-    <ul>
+<p>Специально для вас последние 10 актуальных тем на нашем форуме</p>
+
+<h2><b>Последние темы</b></h2>
+<div class="card" style="height: 300px; overflow-y: scroll;">
+    <div class="card-header">
+        Recent Topics
+    </div>
+    <div class="card-body">
         @foreach (var topic in Model.RecentTopics)
         {
-            <li>@topic.Title - @topic.CreatedAt.ToString("g")</li>
+            <div class="d-flex justify-content-between">
+                <div>
+                    <a asp-action="Details" asp-controller="Forum" asp-route-id="@topic.Id">@topic.Title</a>
+                    <p>@topic.CreatedAt.ToString("g")</p>
+                    <p>
+                        @foreach (var topicTag in topic.TopicTags)
+                        {
+                            <span class="badge badge-secondary">@topicTag.Tag.Name</span>
+                        }
+                    </p>
+                </div>
+            </div>
+            <hr />
         }
-    </ul>
+    </div>
 </div>

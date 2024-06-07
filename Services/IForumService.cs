@@ -11,7 +11,7 @@ namespace WebForum.Services
         Task<List<Category>> GetAllCategoriesAsync();
         Task<Topic> GetTopicByIdAsync(int id);
         Task<List<Post>> GetPostsByTopicIdAsync(int topicId);
-        Task<Post> GetPostByIdAsync(int id); // Добавляем этот метод
+        Task<Post> GetPostByIdAsync(int id); 
         Task AddTopicAsync(Topic topic);
         Task AddPostAsync(Post post);
         Task DeleteTopicAsync(int id);
@@ -19,5 +19,7 @@ namespace WebForum.Services
         Task AddCategoryAsync(Category category);
         Task<Category> GetCategoryByIdAsync(int id);
         Task UpdateCategoryAsync(Category category);
+        Task UpdateTopicAsync(Topic topic);
+        Task UpdatePostAsync(Post post);
     }
 }

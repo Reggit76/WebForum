@@ -6,6 +6,11 @@
 
 <h1>Users</h1>
 
+@if (User.IsInRole("Administrator"))
+{
+    <a asp-action="Create" class="btn btn-primary">Create User</a>
+}
+
 <form asp-action="Index" method="get">
     <input type="text" name="search" placeholder="Search users..." />
     <button type="submit">Search</button>
@@ -28,6 +33,7 @@
                 <td>@user.Email</td>
                 <td>@user.Role</td>
                 <td>
+                    <a class="btn btn-info" asp-action="Edit" asp-route-id="@user.Id">Edit</a>
                     @if (User.IsInRole("Administrator"))
                     {
                         <form asp-action="ChangeRole" method="post" class="d-inline">
@@ -54,7 +60,6 @@
                             <button type="submit" class="btn btn-success">Unban</button>
                         </form>
                     }
-                    <a class="btn btn-info" href="@Url.Action("Edit", new { id = user.Id })">Edit</a>
                 </td>
             </tr>
         }

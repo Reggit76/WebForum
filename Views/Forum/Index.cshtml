@@ -4,32 +4,95 @@
     ViewData["Title"] = "Forum";
 }
 
-<h1>Forum</h1>
+<h1>All topics</h1>
 
-<div class="recent-topics">
-    <h2>Recent Topics</h2>
-    <ul>
-        @foreach (var topic in Model.RecentTopics)
-        {
-            <li>@topic.Title - @topic.CreatedAt.ToString("g")</li>
-        }
-    </ul>
+<div class="d-flex justify-content-between">
+    @if (User.IsInRole("Administrator") || User.IsInRole("Moderator"))
+    {
+        <a asp-action="CreateCategory" class="btn btn-primary">Add Category</a>
+    }
+    <a asp-action="CreateTopic" class="btn btn-primary">Add Topic</a>
 </div>
 
-<div class="categories">
-    <h2>Categories</h2>
-    <ul>
-        @foreach (var category in Model.Categories)
-        {
-            <li>
-                @category.Name
-                <ul>
-                    @foreach (var topic in category.Topics)
+<div class="mt-4">
+    <div class="card">
+        <div class="card-header">
+            Recent Topics
+        </div>
+        <div class="card-body" style="height: 300px; overflow-y: scroll;">
+            @foreach (var topic in Model.RecentTopics)
+            {
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <a asp-action="Details" asp-route-id="@topic.Id">@topic.Title</a>
+                        <p>@topic.CreatedAt.ToString("g")</p>
+                        <p>by @topic.User.UserName</p>
+                        <img src="@topic.User.AvatarUrl" alt="Avatar" class="rounded-circle" style="width: 50px; height: 50px; margin-right: 10px;">
+                        <p>
+                            @foreach (var topicTag in topic.TopicTags)
+                            {
+                                <span class="badge badge-secondary">@topicTag.Tag.Name</span>
+                            }
+                        </p>
+                    </div>
+                    @if (User.IsInRole("Administrator") || User.IsInRole("Moderator"))
                     {
-                        <li>@topic.Title</li>
+                        <form asp-action="MoveTopic" method="post" class="d-inline">
+                            <input type="hidden" name="topicId" value="@topic.Id" />
+                            <select name="categoryId" class="form-control d-inline w-auto">
+                                @foreach (var category in Model.Categories)
+                                {
+                                    <option value="@category.Id">@category.Name</option>
+                                }
+                            </select>
+                            <button type="submit" class="btn btn-secondary">Move</button>
+                        </form>
+                        <form asp-action="DeleteTopic" method="post" class="d-inline">
+                            <input type="hidden" name="id" value="@topic.Id" />
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </form>
                     }
-                </ul>
-            </li>
-        }
-    </ul>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="mt-4">
+    @foreach (var category in Model.Categories)
+    {
+        <div class="card mb-4">
+            <div class="card-header">
+                @category.Name
+            </div>
+            <div class="card-body">
+                <p>@category.Description</p>
+                @foreach (var topic in category.Topics)
+                {
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <a asp-action="Details" asp-route-id="@topic.Id">@topic.Title</a>
+                            <p>@topic.CreatedAt.ToString("g")</p>
+                            <p>by @topic.User.UserName</p>
+                            <img src="@topic.User.AvatarUrl" alt="Avatar" class="rounded-circle" style="width: 50px; height: 50px; margin-right: 10px;">
+                            <p>
+                                @foreach (var topicTag in topic.TopicTags)
+                                {
+                                    <span class="badge badge-secondary">@topicTag.Tag.Name</span>
+                                }
+                            </p>
+                        </div>
+                        @if (User.IsInRole("Administrator") || User.IsInRole("Moderator"))
+                        {
+                            <form asp-action="DeleteTopic" method="post" class="d-inline">
+                                <input type="hidden" name="id" value="@topic.Id" />
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
+                            <a asp-action="EditTopic" asp-route-id="@topic.Id" class="btn btn-warning">Edit</a>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    }
 </div>

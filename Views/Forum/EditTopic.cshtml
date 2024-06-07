@@ -1,12 +1,12 @@
 ﻿@model WebForum.Models.ViewModels.CreateTopicViewModel
 
 @{
-    ViewData["Title"] = "Create a new topic";
+    ViewData["Title"] = "Edit Topic";
 }
 
-<h2>Create a new topic</h2>
+<h2>Edit Topic</h2>
 
-<form method="post" asp-action="CreateTopic">
+<form method="post" asp-action="EditTopic">
     @Html.AntiForgeryToken()
     <div class="form-group">
         <label for="Title">Title</label>
@@ -30,9 +30,6 @@
         </select>
         <span class="text-danger" asp-validation-for="CategoryId"></span>
     </div>
-    <button type="submit" class="btn btn-primary">Create</button>
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-primary">Save</button>
 </form>
-
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}

@@ -155,5 +155,52 @@ namespace WebForum.Controllers
             }
             return View(model);
         }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> Edit()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var userProfile = await _userService.GetUserProfileByIdAsync(user.Id);
+            var model = new EditProfileViewModel
+            {
+                Id = userProfile.Id,
+                UserName = userProfile.UserName,
+                Email = userProfile.Email,
+                Gender = userProfile.Gender,
+                AvatarUrl = userProfile.AvatarUrl,
+                Description = userProfile.Description
+            };
+            return View(model);
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> Edit(EditProfileViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    return NotFound();
+                }
+
+                user.UserName = model.UserName;
+                user.Email = model.Email;
+                user.Gender = model.Gender;
+                user.AvatarUrl = model.AvatarUrl;
+                user.Description = model.Description;
+
+                await _userService.UpdateUserAsync(user);
+                return RedirectToAction("Profile");
+            }
+            return View(model);
+        }
     }
 }

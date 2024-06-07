@@ -1,12 +1,12 @@
 ﻿@model WebForum.Models.ViewModels.EditProfileViewModel
 
 @{
-    ViewData["Title"] = "Edit Profile";
+    ViewData["Title"] = "Edit User";
 }
 
-<h1>Edit Profile</h1>
+<h1>Edit User</h1>
 
-<form asp-action="EditProfile" method="post">
+<form asp-action="Edit" method="post">
     <input type="hidden" asp-for="Id" />
     <div class="form-group">
         <label asp-for="UserName" class="control-label"></label>
@@ -20,11 +20,7 @@
     </div>
     <div class="form-group">
         <label asp-for="Gender" class="control-label"></label>
-        <select asp-for="Gender" class="form-control">
-            <option value="0">Male</option>
-            <option value="1">Female</option>
-            <option value="2">Other</option>
-        </select>
+        <select asp-for="Gender" class="form-control" asp-items="Html.GetEnumSelectList<Gender>()"></select>
         <span asp-validation-for="Gender" class="text-danger"></span>
     </div>
     <div class="form-group">

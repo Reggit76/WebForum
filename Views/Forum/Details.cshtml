@@ -1,39 +1,59 @@
 ﻿@model WebForum.Models.ViewModels.TopicDetailsViewModel
 
 @{
-    ViewData["Title"] = Model.Topic.Title;
+    ViewData["Title"] = "Topic Details";
 }
 
 <h2>@Model.Topic.Title</h2>
-
-<div>
-    <p>@Model.Topic.Content</p>
-    <p>Posted by: @Model.Topic.User.UserName on @Model.Topic.CreatedAt.ToString("MMMM dd, yyyy")</p>
+<p>@Model.Topic.Content</p>
+<div class="d-flex align-items-center">
+    <img src="@Model.Topic.User.AvatarUrl" alt="Avatar" class="rounded-circle" style="width: 50px; height: 50px; margin-right: 10px;">
+    <div>
+        <p>by @Model.Topic.User.UserName</p>
+        <p>@Model.Topic.CreatedAt.ToString("f")</p>
+    </div>
 </div>
 
-<hr />
-
-<h3>Posts</h3>
-@foreach (var post in Model.Posts)
+@if (User.IsInRole("Administrator") || User.IsInRole("Moderator"))
 {
-    <div>
-        <p>@post.Content</p>
-        <p>Posted by: @post.User.UserName on @post.CreatedAt.ToString("MMMM dd, yyyy")</p>
-        <p>Rating: @post.Rating</p> <!-- Fix Rating property -->
-    </div>
-}
-
-<hr />
-
-@if (User.Identity.IsAuthenticated)
-{
-    <h4>Add a post</h4>
-    <form asp-action="CreatePost" method="post">
-        <input type="hidden" asp-for="Topic.Id" />
-        <div class="form-group">
-            <textarea asp-for="NewPost.Content" class="form-control"></textarea>
-            <span asp-validation-for="NewPost.Content" class="text-danger"></span>
-        </div>
-        <button type="submit" class="btn btn-primary">Post</button>
+    <a asp-action="EditTopic" asp-route-id="@Model.Topic.Id" class="btn btn-warning">Edit</a>
+    <form asp-action="DeleteTopic" method="post" class="d-inline">
+        <input type="hidden" name="id" value="@Model.Topic.Id" />
+        <button type="submit" class="btn btn-danger">Delete</button>
     </form>
 }
+
+<h3>Posts</h3>
+<div class="container">
+    @foreach (var post in Model.Posts)
+    {
+        <div class="post-item mb-3">
+            <div class="d-flex align-items-center">
+                <img src="@post.User.AvatarUrl" alt="Avatar" class="rounded-circle" style="width: 50px; height: 50px; margin-right: 10px;">
+                <div>
+                    <p>@post.User.UserName</p>
+                    <p>@post.CreatedAt.ToString("f")</p>
+                    <p>Rating: @post.Rating</p>
+                </div>
+            </div>
+            <p>@post.Content</p>
+            @if (User.IsInRole("Administrator") || User.IsInRole("Moderator"))
+            {
+                <form asp-action="DeletePost" method="post" class="d-inline">
+                    <input type="hidden" name="id" value="@post.Id" />
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+                <a asp-action="EditPost" asp-route-id="@post.Id" class="btn btn-warning">Edit</a>
+            }
+        </div>
+    }
+</div>
+
+<form method="post" asp-action="CreatePost" asp-route-topicId="@Model.Topic.Id">
+    @Html.AntiForgeryToken()
+    <div class="form-group">
+        <label for="Content">Add a new post</label>
+        <textarea class="form-control" id="Content" name="Content"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>

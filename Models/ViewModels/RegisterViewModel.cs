@@ -28,5 +28,7 @@ namespace WebForum.Models.ViewModels
 
         [Required]
         public Gender Gender { get; set; }
+
+        public Role Role { get; set; }
     }
 }

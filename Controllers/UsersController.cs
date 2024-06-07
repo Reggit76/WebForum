@@ -135,5 +135,44 @@ namespace WebForum.Controllers
 
             return RedirectToAction("Index");
         }
+
+        [HttpGet]
+        [Authorize(Roles = "Administrator")]
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Administrator")]
+        public async Task<IActionResult> Create(RegisterViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = new User
+                {
+                    UserName = model.Email,
+                    Email = model.Email,
+                    Gender = model.Gender,
+                    AvatarUrl = string.IsNullOrEmpty(model.AvatarUrl) ? "/images/default-avatar.png" : model.AvatarUrl,
+                    Description = model.Description,
+                    Role = model.Role
+                };
+                
+                var result = await _userService.CreateUserAsync(user, model.Password);
+                if (result.Succeeded)
+                {
+                    await _userService.ChangeUserRoleAsync(user.Id, model.Role.ToString());
+                    return RedirectToAction("Index");
+                }
+
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+            }
+
+            return View(model);
+        }
     }
 }

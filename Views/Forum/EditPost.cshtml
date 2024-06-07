@@ -1,0 +1,23 @@
+﻿@model WebForum.Models.ViewModels.PostViewModel
+
+@{
+    ViewData["Title"] = "Edit Post";
+}
+
+<h2>Edit Post</h2>
+
+<form method="post" asp-action="EditPost">
+    @Html.AntiForgeryToken()
+    <div class="form-group">
+        <label for="Content">Content</label>
+        <textarea class="form-control" id="Content" name="Content">@Model.Content</textarea>
+        <span class="text-danger" asp-validation-for="Content"></span>
+    </div>
+    <div class="form-group">
+        <label for="Rating">Rating</label>
+        <input class="form-control" type="number" id="Rating" name="Rating" value="@Model.Rating" />
+        <span class="text-danger" asp-validation-for="Rating"></span>
+    </div>
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>
