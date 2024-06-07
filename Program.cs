@@ -66,20 +66,6 @@ void Configure(WebApplication app, IWebHostEnvironment env)
     app.UseBanCheck();
     app.UseAuthorization();
 
-    app.Use(async (context, next) =>
-    {
-        if (!context.User.Identity.IsAuthenticated)
-        {
-            var token = context.Request.Form["__RequestVerificationToken"];
-            if (string.IsNullOrEmpty(token))
-            {
-                context.Response.Redirect("/Account/Login");
-                return;
-            }
-        }
-        await next();
-    });
-
     app.MapControllerRoute(
         name: "default",
         pattern: "{controller=Home}/{action=Index}/{id?}");

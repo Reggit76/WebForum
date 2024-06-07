@@ -22,7 +22,7 @@ namespace WebForum.Models
         public User? User { get; set; }
 
         [ForeignKey("Category")]
-        public int CategoryId { get; set; }
+        public int? CategoryId { get; set; }
         public Category? Category { get; set; }
 
         public ICollection<Post> Posts { get; set; } = new List<Post>();

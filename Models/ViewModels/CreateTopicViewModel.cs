@@ -16,7 +16,7 @@ namespace WebForum.Models.ViewModels
         public string Content { get; set; }
 
         [Required(ErrorMessage = "The CategoryId field is required.")]
-        public int CategoryId { get; set; }
+        public int? CategoryId { get; set; }
 
         public List<Category> Categories { get; set; } = new List<Category>();
     }

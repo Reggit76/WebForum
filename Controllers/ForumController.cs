@@ -126,7 +126,7 @@ namespace WebForum.Controllers
             var model = new CreateTopicViewModel
             {
                 Categories = categories.ToList(),
-                CategoryId = categoryId ?? 0
+                CategoryId = categoryId
             };
             _logger.LogInformation("Fetched categories for CreateTopic view");
             return View(model);
@@ -397,6 +397,25 @@ namespace WebForum.Controllers
             };
             _logger.LogInformation("Fetched search results for Search view");
             return View("Index", model);
+        }
+
+        [Authorize(Roles = "Moderator,Administrator")]
+        [HttpPost]
+        public async Task<IActionResult> MoveTopic(int topicId, int categoryId)
+        {
+            _logger.LogInformation("Entered MoveTopic method with topicId={topicId} and categoryId={categoryId}", topicId, categoryId);
+            var topic = await _forumService.GetTopicByIdAsync(topicId);
+            if (topic == null)
+            {
+                _logger.LogWarning("Topic with id={topicId} not found", topicId);
+                return NotFound();
+            }
+
+            topic.CategoryId = categoryId;
+            await _forumService.UpdateTopicAsync(topic);
+            _logger.LogInformation("Topic with id={topicId} moved to category with id={categoryId}", topicId, categoryId);
+
+            return RedirectToAction("Index");
         }
     }
 }
