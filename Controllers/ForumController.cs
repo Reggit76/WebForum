@@ -169,11 +169,75 @@ namespace WebForum.Controllers
             return View(model);
         }
 
-        [Authorize(Roles = "Moderator,Administrator")]
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> EditTopic(int id)
+        {
+            _logger.LogInformation("Entered EditTopic (GET) method with id={id}", id);
+            var topic = await _forumService.GetTopicByIdAsync(id);
+            if (topic == null)
+            {
+                _logger.LogWarning("Topic with id={id} not found", id);
+                return NotFound();
+            }
+
+            var model = new CreateTopicViewModel
+            {
+                Id = topic.Id,
+                Title = topic.Title,
+                Content = topic.Content,
+                CategoryId = topic.CategoryId,
+                Categories = await _categoryService.GetAllCategoriesAsync()
+            };
+            return View(model);
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> EditTopic(CreateTopicViewModel model)
+        {
+            _logger.LogInformation("Entered EditTopic (POST) method with id={model.Id}", model.Id);
+            if (ModelState.IsValid)
+            {
+                var topic = await _forumService.GetTopicByIdAsync(model.Id);
+                if (topic == null)
+                {
+                    _logger.LogWarning("Topic with id={model.Id} not found", model.Id);
+                    return NotFound();
+                }
+
+                topic.Title = model.Title;
+                topic.Content = model.Content;
+                topic.CategoryId = model.CategoryId;
+
+                await _forumService.UpdateTopicAsync(topic);
+                _logger.LogInformation("Topic with id={model.Id} updated", model.Id);
+                return RedirectToAction("Details", new { id = model.Id });
+            }
+
+            model.Categories = await _categoryService.GetAllCategoriesAsync();
+            _logger.LogWarning("Model state is invalid");
+            foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+            {
+                _logger.LogWarning("Validation error: {ErrorMessage}", error.ErrorMessage);
+            }
+            return View(model);
+        }
+
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> DeleteTopic(int id)
         {
             _logger.LogInformation("Entered DeleteTopic method with id={id}", id);
+            var topic = await _forumService.GetTopicByIdAsync(id);
+            var user = await _userManager.GetUserAsync(User);
+
+            if (topic == null || user == null || (user.Id != topic.UserId && !User.IsInRole("Moderator") && !User.IsInRole("Administrator")))
+            {
+                _logger.LogWarning("Unauthorized delete attempt or topic not found with id={id}", id);
+                return Unauthorized();
+            }
+
             await _forumService.DeleteTopicAsync(id);
             _logger.LogInformation("Topic with id={id} deleted", id);
             return RedirectToAction("Index");
@@ -216,96 +280,7 @@ namespace WebForum.Controllers
             return View(model);
         }
 
-        [Authorize(Roles = "Moderator,Administrator")]
-        [HttpPost]
-        public async Task<IActionResult> DeletePost(int id)
-        {
-            _logger.LogInformation("Entered DeletePost method with id={id}", id);
-            var post = await _forumService.GetPostByIdAsync(id);
-            if (post == null)
-            {
-                _logger.LogWarning("Post with id={id} not found", id);
-                return NotFound();
-            }
-            await _forumService.DeletePostAsync(id);
-            _logger.LogInformation("Post with id={id} deleted", id);
-            return RedirectToAction("Details", new { id = post.TopicId });
-        }
-
-        [Authorize(Roles = "Moderator,Administrator")]
-        [HttpPost]
-        public async Task<IActionResult> MoveTopic(int topicId, int categoryId)
-        {
-            _logger.LogInformation("Entered MoveTopic method with topicId={topicId} and categoryId={categoryId}", topicId, categoryId);
-            var topic = await _forumService.GetTopicByIdAsync(topicId);
-            if (topic == null)
-            {
-                _logger.LogWarning("Topic with id={topicId} not found", topicId);
-                return NotFound();
-            }
-
-            topic.CategoryId = categoryId;
-            await _forumService.UpdateTopicAsync(topic);
-            _logger.LogInformation("Topic with id={topicId} moved to category with id={categoryId}", topicId, categoryId);
-
-            return RedirectToAction("Index");
-        }
-
-        [Authorize(Roles = "Moderator,Administrator")]
-        [HttpGet]
-        public async Task<IActionResult> EditTopic(int id)
-        {
-            _logger.LogInformation("Entered EditTopic (GET) method with id={id}", id);
-            var topic = await _forumService.GetTopicByIdAsync(id);
-            if (topic == null)
-            {
-                _logger.LogWarning("Topic with id={id} not found", id);
-                return NotFound();
-            }
-
-            var model = new CreateTopicViewModel
-            {
-                Id = topic.Id,
-                Title = topic.Title,
-                Content = topic.Content,
-                CategoryId = topic.CategoryId,
-                Categories = await _categoryService.GetAllCategoriesAsync()
-            };
-            return View(model);
-        }
-
-        [Authorize(Roles = "Moderator,Administrator")]
-        [HttpPost]
-        public async Task<IActionResult> EditTopic(CreateTopicViewModel model)
-        {
-            _logger.LogInformation("Entered EditTopic (POST) method with model={model}", model);
-            if (ModelState.IsValid)
-            {
-                var topic = await _forumService.GetTopicByIdAsync(model.Id);
-                if (topic == null)
-                {
-                    _logger.LogWarning("Topic with id={model.Id} not found", model.Id);
-                    return NotFound();
-                }
-
-                topic.Title = model.Title;
-                topic.Content = model.Content;
-                topic.CategoryId = model.CategoryId;
-
-                await _forumService.UpdateTopicAsync(topic);
-                _logger.LogInformation("Topic with id={model.Id} updated", model.Id);
-                return RedirectToAction("Details", new { id = topic.Id });
-            }
-            _logger.LogWarning("Model state is invalid");
-            foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
-            {
-                _logger.LogWarning("Validation error: {ErrorMessage}", error.ErrorMessage);
-            }
-            model.Categories = await _categoryService.GetAllCategoriesAsync();
-            return View(model);
-        }
-
-        [Authorize(Roles = "Moderator,Administrator")]
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> EditPost(int id)
         {
@@ -326,7 +301,7 @@ namespace WebForum.Controllers
             return View(model);
         }
 
-        [Authorize(Roles = "Moderator,Administrator")]
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> EditPost(PostViewModel model)
         {
@@ -353,6 +328,25 @@ namespace WebForum.Controllers
                 _logger.LogWarning("Validation error: {ErrorMessage}", error.ErrorMessage);
             }
             return View(model);
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> DeletePost(int id)
+        {
+            _logger.LogInformation("Entered DeletePost method with id={id}", id);
+            var post = await _forumService.GetPostByIdAsync(id);
+            var user = await _userManager.GetUserAsync(User);
+
+            if (post == null || user == null || (user.Id != post.UserId && !User.IsInRole("Moderator") && !User.IsInRole("Administrator")))
+            {
+                _logger.LogWarning("Unauthorized delete attempt or post not found with id={id}", id);
+                return Unauthorized();
+            }
+
+            await _forumService.DeletePostAsync(id);
+            _logger.LogInformation("Post with id={id} deleted", id);
+            return RedirectToAction("Details", new { id = post.TopicId });
         }
 
         [Authorize]
@@ -387,6 +381,22 @@ namespace WebForum.Controllers
             _logger.LogInformation("Post with id={postId} updated with new rating={rating}", postId, post.Rating);
 
             return RedirectToAction("Details", new { id = post.TopicId });
+        }
+
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> Search(string searchString)
+        {
+            _logger.LogInformation("Entered Search method with searchString={searchString}", searchString);
+            var topics = await _forumService.SearchTopicsAsync(searchString);
+            var categories = await _categoryService.GetAllCategoriesAsync();
+            var model = new ForumIndexViewModel
+            {
+                RecentTopics = topics,
+                Categories = categories
+            };
+            _logger.LogInformation("Fetched search results for Search view");
+            return View("Index", model);
         }
     }
 }

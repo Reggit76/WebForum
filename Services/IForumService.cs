@@ -21,5 +21,6 @@ namespace WebForum.Services
         Task UpdateCategoryAsync(Category category);
         Task UpdateTopicAsync(Topic topic);
         Task UpdatePostAsync(Post post);
+        Task<List<Topic>> SearchTopicsAsync(string searchString);
     }
 }

@@ -21,10 +21,10 @@
     <div class="form-group">
         <label for="CategoryId">Category</label>
         <select class="form-control" id="CategoryId" name="CategoryId">
-            <option value="">Select a category</option>
+            <option value="0">No Category</option>
             @foreach (var category in Model.Categories)
             {
-                var selected = category.Id == Model.CategoryId ? "selected" : "";
+                var selected = (category.Id == Model.CategoryId ? "selected" : "");
                 <option value="@category.Id" selected=@selected>@category.Name</option>
             }
         </select>

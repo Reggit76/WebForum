@@ -177,5 +177,15 @@ namespace WebForum.Services
             await _context.SaveChangesAsync();
             _logger.LogInformation("Post with id={id} updated", post.Id);
         }
+        public async Task<List<Topic>> SearchTopicsAsync(string searchString)
+        {
+            return await _context.Topics
+                .Include(t => t.User)
+                .Include(t => t.Category)
+                .Include(t => t.TopicTags)
+                .ThenInclude(tt => tt.Tag)
+                .Where(t => t.Title.Contains(searchString) || t.Content.Contains(searchString))
+                .ToListAsync();
+        }
     }
 }

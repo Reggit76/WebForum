@@ -26,13 +26,15 @@
                     <div>
                         <a asp-action="Details" asp-route-id="@topic.Id">@topic.Title</a>
                         <p>@topic.CreatedAt.ToString("g")</p>
-                        <p>by @topic.User.UserName</p>
-                        <img src="@topic.User.AvatarUrl" alt="Avatar" class="rounded-circle" style="width: 50px; height: 50px; margin-right: 10px;">
                         <p>
                             @foreach (var topicTag in topic.TopicTags)
                             {
                                 <span class="badge badge-secondary">@topicTag.Tag.Name</span>
                             }
+                        </p>
+                        <p>
+                            <strong>Author:</strong> @topic.User.UserName
+                            <img src="@topic.User.AvatarUrl" alt="Avatar" style="width:30px;height:30px;" />
                         </p>
                     </div>
                     @if (User.IsInRole("Administrator") || User.IsInRole("Moderator"))
@@ -51,6 +53,7 @@
                             <input type="hidden" name="id" value="@topic.Id" />
                             <button type="submit" class="btn btn-danger">Delete</button>
                         </form>
+                        <a asp-action="EditTopic" asp-route-id="@topic.Id" class="btn btn-secondary">Edit</a>
                     }
                 </div>
             }
@@ -69,27 +72,19 @@
                 <p>@category.Description</p>
                 @foreach (var topic in category.Topics)
                 {
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <a asp-action="Details" asp-route-id="@topic.Id">@topic.Title</a>
-                            <p>@topic.CreatedAt.ToString("g")</p>
-                            <p>by @topic.User.UserName</p>
-                            <img src="@topic.User.AvatarUrl" alt="Avatar" class="rounded-circle" style="width: 50px; height: 50px; margin-right: 10px;">
-                            <p>
-                                @foreach (var topicTag in topic.TopicTags)
-                                {
-                                    <span class="badge badge-secondary">@topicTag.Tag.Name</span>
-                                }
-                            </p>
-                        </div>
-                        @if (User.IsInRole("Administrator") || User.IsInRole("Moderator"))
-                        {
-                            <form asp-action="DeleteTopic" method="post" class="d-inline">
-                                <input type="hidden" name="id" value="@topic.Id" />
-                                <button type="submit" class="btn btn-danger">Delete</button>
-                            </form>
-                            <a asp-action="EditTopic" asp-route-id="@topic.Id" class="btn btn-warning">Edit</a>
-                        }
+                    <div>
+                        <a asp-action="Details" asp-route-id="@topic.Id">@topic.Title</a>
+                        <p>@topic.CreatedAt.ToString("g")</p>
+                        <p>
+                            @foreach (var topicTag in topic.TopicTags)
+                            {
+                                <span class="badge badge-secondary">@topicTag.Tag.Name</span>
+                            }
+                        </p>
+                        <p>
+                            <strong>Author:</strong> @topic.User.UserName
+                            <img src="@topic.User.AvatarUrl" alt="Avatar" style="width:30px;height:30px;" />
+                        </p>
                     </div>
                 }
             </div>
